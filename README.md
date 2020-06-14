@@ -8,19 +8,18 @@ Image Block for the [Editor.js](https://editorjs.io).
 
 ## Features
 
-- Uploading file from the device
-- Pasting copied content from the web
-- Pasting images by drag-n-drop
-- Pasting files and screenshots from Clipboard
-- Allows adding a border, and a background
-- Allows stretching an image to the container's full-width
+-   Uploading file from the device
+-   Pasting copied content from the web
+-   Pasting images by drag-n-drop
+-   Pasting files and screenshots from Clipboard
+-   Allows adding a border, and a background
+-   Allows stretching an image to the container's full-width
 
 **Notes**
 
 This Tool requires server-side implementation for the file uploading. See [backend response format](#server-format) for more details.
 
 This Tool is also capable of uploading & displaying video files using the <video> element. To enable this, specify video mime-types via the 'types' config param.
-
 
 ## Installation
 
@@ -35,7 +34,7 @@ npm i --save-dev @editorjs/image
 Include module at your application
 
 ```javascript
-import ImageTool from '@editorjs/image';
+import ImageTool from "@editorjs/image";
 ```
 
 ### Other methods
@@ -87,16 +86,17 @@ var editor = EditorJS({
 
 Image Tool supports these configuration parameters:
 
-| Field | Type     | Description        |
-| ----- | -------- | ------------------ |
-| endpoints | `{byFile: string, byUrl: string}` | Endpoints for file uploading. <br> Contains 2 fields: <br> __byFile__ - for file uploading <br> __byUrl__ - for uploading by URL |
-| field | `string` | (default: `image`) Name of uploaded image field in POST request |
-| types | `string` | (default: `image/*`) Mime-types of files that can be [accepted with file selection](https://github.com/codex-team/ajax#accept-string).|
-| additionalRequestData | `object` | Object with any data you want to send with uploading requests |
-| additionalRequestHeaders | `object` | Object with any custom headers which will be added to request. [See example](https://github.com/codex-team/ajax/blob/e5bc2a2391a18574c88b7ecd6508c29974c3e27f/README.md#headers-object) |
-| captionPlaceholder | `string` | (default: `Caption`) Placeholder for Caption input |
-| buttonContent | `string` | Allows to override HTML content of «Select file» button |
-| uploader | `{{uploadByFile: function, uploadByUrl: function}}` | Optional custom uploading methods. See details below. |
+| Field                    | Type                                                | Description                                                                                                                                                                             |
+| ------------------------ | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| endpoints                | `{byFile: string, byUrl: string}`                   | Endpoints for file uploading. <br> Contains 2 fields: <br> **byFile** - for file uploading <br> **byUrl** - for uploading by URL                                                        |
+| field                    | `string`                                            | (default: `image`) Name of uploaded image field in POST request                                                                                                                         |
+| types                    | `string`                                            | (default: `image/*`) Mime-types of files that can be [accepted with file selection](https://github.com/codex-team/ajax#accept-string).                                                  |
+| additionalRequestData    | `object`                                            | Object with any data you want to send with uploading requests                                                                                                                           |
+| additionalRequestHeaders | `object`                                            | Object with any custom headers which will be added to request. [See example](https://github.com/codex-team/ajax/blob/e5bc2a2391a18574c88b7ecd6508c29974c3e27f/README.md#headers-object) |
+| captionPlaceholder       | `string`                                            | (default: `Caption`) Placeholder for Caption input                                                                                                                                      |
+| altPlaceholder           | `string`                                            | (default: `Alt`) Placeholder for alt tag                                                                                                                                                |
+| buttonContent            | `string`                                            | Allows to override HTML content of «Select file» button                                                                                                                                 |
+| uploader                 | `{{uploadByFile: function, uploadByUrl: function}}` | Optional custom uploading methods. See details below.                                                                                                                                   |
 
 Note that if you don't implement your custom uploader methods, the `endpoints` param is required.
 
@@ -114,26 +114,27 @@ Note that if you don't implement your custom uploader methods, the `endpoints` p
 
 This Tool returns `data` with following format
 
-| Field          | Type      | Description                     |
-| -------------- | --------- | ------------------------------- |
+| Field          | Type      | Description                                                                               |
+| -------------- | --------- | ----------------------------------------------------------------------------------------- |
 | file           | `object`  | Uploaded file data. Any data got from backend uploader. Always contain the `url` property |
-| caption        | `string`  | image's caption                 |
-| withBorder     | `boolean` | add border to image             |
-| withBackground | `boolean` | need to add background          |
-| stretched      | `boolean` | stretch image to screen's width |
-
+| caption        | `string`  | image's caption                                                                           |
+| alt            | `string`  | image's alt tag                                                                           |
+| withBorder     | `boolean` | add border to image                                                                       |
+| withBackground | `boolean` | need to add background                                                                    |
+| stretched      | `boolean` | stretch image to screen's width                                                           |
 
 ```json
 {
-    "type" : "image",
-    "data" : {
+    "type": "image",
+    "data": {
         "file": {
-            "url" : "https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/roadster_and_semi/roadster/hero.jpg"
+            "url": "https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/roadster_and_semi/roadster/hero.jpg"
         },
-        "caption" : "Roadster // tesla.com",
-        "withBorder" : false,
-        "withBackground" : false,
-        "stretched" : true
+        "caption": "Roadster // tesla.com",
+        "alt": "Tesla roadster",
+        "withBorder": false,
+        "withBackground": false,
+        "stretched": true
     }
 }
 ```
@@ -163,11 +164,11 @@ Response of your uploader **should** cover following format:
 
 ```json5
 {
-    "success" : 1,
-    "file": {
-        "url" : "https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/roadster_and_semi/roadster/hero.jpg",
+    success: 1,
+    file: {
+        url: "https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/roadster_and_semi/roadster/hero.jpg",
         // ... and any additional fields you want to store, such as width, height, color, extension, etc
-    }
+    },
 }
 ```
 
@@ -184,11 +185,10 @@ Scenario:
 1. User pastes an URL of the image file to the Editor
 2. Editor pass pasted string to the Image Tool
 3. Tool sends it to **your** backend (on `config.endpoint.byUrl` route) via 'url' POST-parameter
-3. Your backend should accept URL, **download and save the original file by passed URL** and return file data with JSON at specified format.
-4. Image tool shows saved image and stores server answer
+4. Your backend should accept URL, **download and save the original file by passed URL** and return file data with JSON at specified format.
+5. Image tool shows saved image and stores server answer
 
 Response of your uploader should be at the same format as described at «[Uploading files from device](#from-device)» section
-
 
 ### Uploading by drag-n-drop or from Clipboard
 
@@ -201,11 +201,10 @@ As mentioned at the Config Params section, you have an ability to provide own cu
 It is a quite simple: implement `uploadByFile` and `uploadByUrl` methods and pass them via `uploader` config param.
 Both methods must return a Promise that resolves with response in a format that described at the [backend response format](#server-format) section.
 
-
-| Method         | Arguments | Return value | Description |
-| -------------- | --------- | -------------| ------------|
-| uploadByFile   | `File`    | `{Promise.<{success, file: {url}}>}` | Upload file to the server and return an uploaded image data |
-| uploadByUrl    | `string`  | `{Promise.<{success, file: {url}}>}` | Send URL-string to the server, that should load image by this URL and return an uploaded image data |
+| Method       | Arguments | Return value                         | Description                                                                                         |
+| ------------ | --------- | ------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| uploadByFile | `File`    | `{Promise.<{success, file: {url}}>}` | Upload file to the server and return an uploaded image data                                         |
+| uploadByUrl  | `string`  | `{Promise.<{success, file: {url}}>}` | Send URL-string to the server, that should load image by this URL and return an uploaded image data |
 
 Example:
 

@@ -39,10 +39,11 @@
  * @property {boolean} stretched - should image be stretched to full width of container
  * @property {object} file — Image file data returned from backend
  * @property {string} file.url — image URL
+ * @property {string} alt — alternative text
  */
 
 // eslint-disable-next-line
-import css from './index.css';
+import css from "./index.css";
 import Ui from './ui';
 import Tunes from './tunes';
 import ToolboxIcon from './svg/toolbox.svg';
@@ -57,6 +58,7 @@ import Uploader from './uploader';
  * @property {string} field - field name for uploaded image
  * @property {string} types - available mime-types
  * @property {string} captionPlaceholder - placeholder for Caption field
+ * @property {string} altPlaceholder - placeholder for alt field
  * @property {object} additionalRequestData - any data to send with requests
  * @property {object} additionalRequestHeaders - allows to pass custom headers with Request
  * @property {string} buttonContent - overrides for Select File button
@@ -107,7 +109,10 @@ export default class ImageTool {
       additionalRequestHeaders: config.additionalRequestHeaders || {},
       field: config.field || 'image',
       types: config.types || 'image/*',
-      captionPlaceholder: this.api.i18n.t(config.captionPlaceholder || 'Caption'),
+      captionPlaceholder: this.api.i18n.t(
+        config.captionPlaceholder || 'Caption'
+      ),
+      altPlaceholder: config.altPlaceholder || 'Alt',
       buttonContent: config.buttonContent || '',
       uploader: config.uploader || undefined,
     };
@@ -171,8 +176,10 @@ export default class ImageTool {
    */
   save() {
     const caption = this.ui.nodes.caption;
+    const alt = this.ui.nodes.alt;
 
     this._data.caption = caption.innerHTML;
+    this._data.alt = alt.innerHTML;
 
     return this.data;
   }
@@ -284,10 +291,15 @@ export default class ImageTool {
     this.image = data.file;
 
     this._data.caption = data.caption || '';
+    this._data.alt = data.alt || '';
     this.ui.fillCaption(this._data.caption);
+    this.ui.fillAlt(this._data.alt);
 
     Tunes.tunes.forEach(({ name: tune }) => {
-      const value = typeof data[tune] !== 'undefined' ? data[tune] === true || data[tune] === 'true' : false;
+      const value =
+                typeof data[tune] !== 'undefined'
+                  ? data[tune] === true || data[tune] === 'true'
+                  : false;
 
       this.setTune(tune, value);
     });
@@ -331,7 +343,9 @@ export default class ImageTool {
     if (response.success && response.file) {
       this.image = response.file;
     } else {
-      this.uploadingFailed('incorrect response: ' + JSON.stringify(response));
+      this.uploadingFailed(
+        'incorrect response: ' + JSON.stringify(response)
+      );
     }
   }
 
@@ -346,7 +360,9 @@ export default class ImageTool {
     console.log('Image Tool: uploading failed because of', errorText);
 
     this.api.notifier.show({
-      message: this.api.i18n.t('Couldn’t upload image. Please try another.'),
+      message: this.api.i18n.t(
+        'Couldn’t upload image. Please try another.'
+      ),
       style: 'error',
     });
     this.ui.hidePreloader();
@@ -381,12 +397,13 @@ export default class ImageTool {
       /**
        * Wait until the API is ready
        */
-      Promise.resolve().then(() => {
-        const blockId = this.api.blocks.getCurrentBlockIndex();
+      Promise.resolve()
+        .then(() => {
+          const blockId = this.api.blocks.getCurrentBlockIndex();
 
-        this.api.blocks.stretchBlock(blockId, value);
-      })
-        .catch(err => {
+          this.api.blocks.stretchBlock(blockId, value);
+        })
+        .catch((err) => {
           console.error(err);
         });
     }
