@@ -1,0 +1,163 @@
+From c73be0bd8ecf3c73e79694a952f459e79c8394c5 Mon Sep 17 00:00:00 2001
+From: Duncan Krebbers <duncan@projectfive.nl>
+Date: Mon, 14 Oct 2019 16:18:13 +0200
+Subject: [PATCH 1/4] Support custom tunes in index.js
+
+---
+ src/index.js | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/index.js b/src/index.js
+index f0c0616..90a77fb 100644
+--- a/src/index.js
++++ b/src/index.js
+@@ -107,7 +107,8 @@ export default class ImageTool {
+       types: config.types || 'image/*',
+       captionPlaceholder: config.captionPlaceholder || 'Caption',
+       buttonContent: config.buttonContent || '',
+-      uploader: config.uploader || undefined
++      uploader: config.uploader || undefined,
++      actions: config.actions || [],
+     };
+ 
+     /**
+@@ -139,6 +140,7 @@ export default class ImageTool {
+      */
+     this.tunes = new Tunes({
+       api,
++      actions: this.config.actions,
+       onChange: (tuneName) => this.tuneToggled(tuneName)
+     });
+ 
+
+From 1ccf22706686bb39feda881ea2f5d181c054926c Mon Sep 17 00:00:00 2001
+From: Duncan Krebbers <duncan@projectfive.nl>
+Date: Mon, 14 Oct 2019 16:28:01 +0200
+Subject: [PATCH 2/4] Support custom tunes in tunes.js
+
+---
+ src/tunes.js | 18 ++++++++++++++----
+ 1 file changed, 14 insertions(+), 4 deletions(-)
+
+diff --git a/src/tunes.js b/src/tunes.js
+index 3cd2d13..2f4cee3 100644
+--- a/src/tunes.js
++++ b/src/tunes.js
+@@ -9,10 +9,12 @@ import stretchedIcon from './svg/stretched.svg';
+ export default class Tunes {
+   /**
+    * @param {object} api - Editor API
++   * @param {array} actions - Userdefined tunes
+    * @param {function} onChange - tune toggling callback
+    */
+-  constructor({ api, onChange }) {
++  constructor({ api, actions, onChange }) {
+     this.api = api;
++    this.actions = actions;
+     this.onChange = onChange;
+     this.buttons = [];
+   }
+@@ -63,14 +65,15 @@ export default class Tunes {
+ 
+     this.buttons = [];
+ 
+-    Tunes.tunes.forEach(tune => {
++    const tunes = Tunes.tunes.concat(this.actions);
++    tunes.forEach((tune) => {
+       let el = make('div', [this.CSS.buttonBase, this.CSS.button], {
+         innerHTML: tune.icon,
+         title: tune.title
+       });
+ 
+       el.addEventListener('click', () => {
+-        this.tuneClicked(tune.name);
++        this.tuneClicked(tune.name, tune.action);
+       });
+ 
+       el.dataset.tune = tune.name;
+@@ -87,8 +90,15 @@ export default class Tunes {
+   /**
+    * Clicks to one of the tunes
+    * @param {string} tuneName - clicked tune name
++   * @param {function} customFunction - function to execute on click
+    */
+-  tuneClicked(tuneName) {
++  tuneClicked(tuneName, customFunction) {
++    if (typeof customFunction === 'function') {
++        if (!customFunction(tuneName)) {
++            return false;
++        }
++    }
++    
+     let button = this.buttons.find(el => el.dataset.tune === tuneName);
+ 
+     button.classList.toggle(this.CSS.buttonActive, !button.classList.contains(this.CSS.buttonActive));
+
+From 780df65e840d969a8ad40cf1041e3bd40a58efb6 Mon Sep 17 00:00:00 2001
+From: Duncan Krebbers <duncan@projectfive.nl>
+Date: Mon, 14 Oct 2019 16:36:17 +0200
+Subject: [PATCH 3/4] Update Readme for custom actions
+
+---
+ README.md | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/README.md b/README.md
+index 40114f4..4d46560 100644
+--- a/README.md
++++ b/README.md
+@@ -92,6 +92,7 @@ Image Tool supports these configuration parameters:
+ | captionPlaceholder | `string` | (default: `Caption`) Placeholder for Caption input |
+ | buttonContent | `string` | Allows to override HTML content of «Select file» button |
+ | uploader | `{{uploadByFile: function, uploadByUrl: function}}` | Optional custom uploading methods. See details below. |
++| actions | `array` | Array with custom actions to show in the tool's settings menu. See details below. |
+ 
+ Note that if you don't implement your custom uploader methods, the `endpoints` param is required. 
+ 
+@@ -105,6 +106,23 @@ Note that if you don't implement your custom uploader methods, the `endpoints` p
+ 
+ 3. Add background
+ 
++Add extra setting-buttons by adding them to the `actions`-array in the configuration:
++```js
++actions: [
++    {
++        name: 'new_button',
++        icon: '<svg>...</svg>',
++        title: 'New Button',
++        action: (name) => {
++            alert(`${name} button clicked`);
++            return false;
++        }
++    }
++]
++```
++By adding `return true` or `return false` at the end of your custom actions, you can determine wether the icon in the tool's settings is toggled or not. This is helpfull for actions that do not toggle between states, but execute a different action.
++If toggling is enabled, an `image-tool--[button name]` class will be appended and removed from the container.
++
+ ## Output data
+ 
+ This Tool returns `data` with following format
+
+From b32a006429d1d24b658ffe6fae36ba02dbdd6301 Mon Sep 17 00:00:00 2001
+From: Duncan Krebbers <duncan@projectfive.nl>
+Date: Mon, 14 Oct 2019 16:38:27 +0200
+Subject: [PATCH 4/4] Remove extra comma
+
+---
+ src/index.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/index.js b/src/index.js
+index 90a77fb..8dbdf65 100644
+--- a/src/index.js
++++ b/src/index.js
+@@ -108,7 +108,7 @@ export default class ImageTool {
+       captionPlaceholder: config.captionPlaceholder || 'Caption',
+       buttonContent: config.buttonContent || '',
+       uploader: config.uploader || undefined,
+-      actions: config.actions || [],
++      actions: config.actions || []
+     };
+ 
+     /**
