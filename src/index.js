@@ -148,7 +148,7 @@ export default class ImageTool {
     this.tunes = new Tunes({
       api,
       actions: this.config.actions,
-      onChange: (tuneName) => this.tuneToggled(tuneName),
+      onChange: (tuneName, state) => this.tuneToggled(tuneName, state),
     });
 
     /**
@@ -376,11 +376,15 @@ export default class ImageTool {
    * @private
    *
    * @param {string} tuneName - tune that has been clicked
+   * @param {boolean} state – necessary state
    * @returns {void}
    */
-  tuneToggled(tuneName) {
-    // inverse tune state
-    this.setTune(tuneName, !this._data[tuneName]);
+  tuneToggled(tuneName, state) {
+    // change tune state
+    this.setTune(
+      tuneName,
+      state !== undefined ? state : !this._data[tuneName]
+    );
   }
 
   /**
