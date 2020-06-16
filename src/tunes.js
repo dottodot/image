@@ -2,8 +2,6 @@ import { make } from './ui';
 import bgIcon from './svg/background.svg';
 import borderIcon from './svg/border.svg';
 import stretchedIcon from './svg/stretched.svg';
-import floatToLeftIcon from './svg/arrow-left.svg';
-import floatToRightIcon from './svg/arrow-right.svg';
 
 /**
  * Working with Block Tunes
@@ -43,16 +41,6 @@ export default class Tunes {
         name: 'withBackground',
         icon: bgIcon,
         title: 'With background',
-      },
-      {
-        name: 'floatToLeft',
-        icon: floatToLeftIcon,
-        title: 'Float image to left',
-      },
-      {
-        name: 'floatToRight',
-        icon: floatToRightIcon,
-        title: 'Float image to right',
       },
     ];
   }
